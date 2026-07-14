@@ -48,7 +48,7 @@ const academicSearchAction: ResearchAction<typeof schema> = {
       researchBlock: researchBlock,
       session: additionalConfig.session,
       searchConfig: {
-        engines: ['arxiv', 'google scholar', 'pubmed'],
+        engines: ['google scholar', 'semantic scholar', 'openalex', 'crossref', 'arxiv', 'pubmed'],
       },
     });
 
