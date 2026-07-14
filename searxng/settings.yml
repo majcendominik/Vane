@@ -71,6 +71,10 @@ hostnames:
     - '(.*\.)?semanticscholar\.org$'
     - 'ieeexplore\.ieee\.org$'
     - 'dl\.acm\.org$'
+
+    # Publisher domains
+    - '(.*\.)?sciencedirect\.com$'
+    - '(.*\.)?mdpi\.com$'
   low_priority:
     - '(.*\.)?pinterest\..*$'
     - '(.*\.)?quora\.com$'
