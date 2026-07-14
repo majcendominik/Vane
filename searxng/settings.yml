@@ -1,17 +1,110 @@
-use_default_settings: true
+use_default_settings:
+  engines:
+    keep_only:
+      # General web
+      - brave
+      - duckduckgo
+      - startpage
+      # Available to Vane's academic search (classifier-routed, not in general)
+      - google scholar
+      - semantic scholar
+      - arxiv
+      - pubmed
+      - crossref
+      - openalex
+      # Background knowledge
+      - wikipedia
+      - wikidata
+      # Vane auxiliary modes
+      - wolframalpha        # calculation widget
+      - reddit              # discussion search
+      - youtube             # video search
+      - brave.news
+      - startpage news
+      # Required verbatim by Vane's image search
+      - bing images
+      - google images
+      - brave.images
+      - brave.videos
+      - duckduckgo images
+      - duckduckgo videos
 
 general:
-  instance_name: 'searxng'
+  instance_name: "Vane SearXNG"
 
 search:
-  autocomplete: 'google'
+  safe_search: 0            # raise to 1 if the instance serves families/shared users
+  autocomplete: ""
+  default_lang: "auto"      # follow the query's language — works for any user
+  max_page: 2
   formats:
     - html
     - json
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
 
 server:
-  secret_key: 'a2fb23f1b02e6ee83875b09826990de0f6bd908b6638e8c10277d415f6ab852b' # Is overwritten by ${SEARXNG_SECRET}
+  # Set SEARXNG_SECRET via environment (no Docker entrypoint on a native install)
+  limiter: false
+  public_instance: false
+
+outgoing:
+  request_timeout: 5.0
+  max_request_timeout: 9.0
+  pool_connections: 100
+  pool_maxsize: 30
+  enable_http2: true
+
+hostnames:
+  # Harmless for general users (only reorders results that actually match),
+  # helpful when academic domains appear
+  high_priority:
+    - '(.*\.)?arxiv\.org$'
+    - '(.*\.)?doi\.org$'
+    - 'pubmed\.ncbi\.nlm\.nih\.gov$'
+    - 'pmc\.ncbi\.nlm\.nih\.gov$'
+    - '(.*\.)?semanticscholar\.org$'
+    - 'ieeexplore\.ieee\.org$'
+    - 'dl\.acm\.org$'
+  low_priority:
+    - '(.*\.)?pinterest\..*$'
+    - '(.*\.)?quora\.com$'
+    - '(.*\.)?scribd\.com$'
 
 engines:
+  - name: brave
+    disabled: false
+    weight: 1.2
+    timeout: 6.0
+  - name: duckduckgo
+    disabled: false
+    timeout: 6.0
+  - name: startpage
+    disabled: false
+    timeout: 6.0
+  # Academic engines: enabled but left in their default 'science' category,
+  # so they fire only when Vane's academic search requests them by name
+  - name: google scholar
+    disabled: false
+    timeout: 8.0
+  - name: semantic scholar
+    disabled: false
+    timeout: 8.0
+  - name: arxiv
+    disabled: false
+    timeout: 8.0
+  - name: pubmed
+    disabled: false
+    timeout: 8.0
+  - name: openalex
+    disabled: false
+    timeout: 8.0
+  - name: crossref
+    disabled: false
+    timeout: 8.0
   - name: wolframalpha
     disabled: false
+    timeout: 6.0
+  - name: reddit
+    disabled: false
+    timeout: 7.0
