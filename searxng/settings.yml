@@ -19,6 +19,7 @@ use_default_settings:
       - wolframalpha        # calculation widget
       - reddit              # discussion search
       - youtube             # video search
+      - bing news
       - brave.news
       - startpage news
       # Required verbatim by Vane's image search
