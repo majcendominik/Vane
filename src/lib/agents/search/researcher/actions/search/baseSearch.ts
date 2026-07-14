@@ -5,6 +5,10 @@ import SessionManager from '@/lib/session';
 import { Chunk, ResearchBlock, SearchResultsResearchBlock } from '@/lib/types';
 import { SearchAgentConfig } from '../../../types';
 import computeSimilarity from '@/lib/utils/computeSimilarity';
+import {
+  clusterSearchResults,
+  defaultClusteringOptions,
+} from './resultClustering';
 import z from 'zod';
 import Scraper from '@/lib/scraper';
 import { splitText } from '@/lib/utils/splitText';
@@ -129,38 +133,16 @@ export const executeSearch = async (input: {
 
     results.sort((a, b) => b.metadata.similarity - a.metadata.similarity);
 
-    const uniqueSearchResultIndices: Set<number> = new Set();
-
-    for (let i = 0; i < results.length; i++) {
-      let isDuplicate = false;
-
-      for (const indice of uniqueSearchResultIndices.keys()) {
-        if (
-          results[i].metadata.embedding.length === 0 ||
-          results[indice].metadata.embedding.length === 0
-        )
-          continue;
-
-        const similarity = computeSimilarity(
-          results[i].metadata.embedding,
-          results[indice].metadata.embedding,
-        );
-
-        if (similarity > 0.75) {
-          isDuplicate = true;
-          break;
-        }
-      }
-
-      if (!isDuplicate) {
-        uniqueSearchResultIndices.add(i);
-      }
-    }
-
-    const uniqueSearchResults = Array.from(uniqueSearchResultIndices.keys())
-      .map((i) => {
-        const uniqueResult = results[i];
-
+    // Near-duplicates are clustered instead of dropped: the most relevant
+    // member keeps its content, merged-away members survive as citation-only
+    // references on it (metadata.corroborating). The merge threshold is
+    // calibrated from this batch's own similarity distribution, since a
+    // hardcoded cutoff behaves very differently across embedding models.
+    const uniqueSearchResults = clusterSearchResults(
+      results,
+      defaultClusteringOptions(),
+    )
+      .map((uniqueResult) => {
         delete uniqueResult.metadata.embedding;
         delete uniqueResult.metadata.similarity;
 

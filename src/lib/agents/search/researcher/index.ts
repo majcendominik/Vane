@@ -5,6 +5,11 @@ import SessionManager from '@/lib/session';
 import { Message, ReasoningResearchBlock } from '@/lib/types';
 import formatChatHistoryAsString from '@/lib/utils/formatHistory';
 import { ToolCall } from '@/lib/models/types';
+import {
+  defaultClusteringOptions,
+  expandWithCorroboratingStubs,
+  mergeCorroboratingSources,
+} from './actions/search/resultClustering';
 
 class Researcher {
   async research(
@@ -199,6 +204,11 @@ class Researcher {
           const existingResult = searchResults[existingIndex];
 
           existingResult.content += `\n\n${result.content}`;
+          existingResult.metadata.corroborating = mergeCorroboratingSources(
+            existingResult,
+            result,
+            defaultClusteringOptions().maxCorroboratingPerResult,
+          );
 
           return undefined;
         }
@@ -207,15 +217,23 @@ class Researcher {
       })
       .filter((r) => r !== undefined);
 
+    // Give clustered near-duplicates their own citation indices: each
+    // representative is followed by citation-only stubs for the sources that
+    // corroborate it, so the writer can cite the group ([1][2][3]) and the UI
+    // shows a card for every source, while only representatives carry content.
+    const expandedSearchResults = expandWithCorroboratingStubs(
+      filteredSearchResults,
+    );
+
     session.emitBlock({
       id: crypto.randomUUID(),
       type: 'source',
-      data: filteredSearchResults,
+      data: expandedSearchResults,
     });
 
     return {
       findings: actionOutput,
-      searchFindings: filteredSearchResults,
+      searchFindings: expandedSearchResults,
     };
   }
 }
