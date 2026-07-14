@@ -43,6 +43,14 @@ search:
     - json
   ban_time_on_fail: 5
   max_ban_time_on_fail: 120
+  # Exception-based suspensions (captcha / 429 / access denied) are governed
+  # here, NOT by ban_time_on_fail. SearxNG defaults bench a captcha'd engine
+  # for an hour or more; recover in minutes instead.
+  suspended_times:
+    SearxEngineCaptcha: 300
+    SearxEngineTooManyRequests: 60
+    SearxEngineAccessDenied: 300
+
 
 server:
   # Hardcoded because Vane's entrypoint launches SearxNG via sudo,
