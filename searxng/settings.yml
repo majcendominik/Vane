@@ -44,7 +44,11 @@ search:
   max_ban_time_on_fail: 120
 
 server:
-  # Set SEARXNG_SECRET via environment (no Docker entrypoint on a native install)
+  # Hardcoded because Vane's entrypoint launches SearxNG via sudo,
+  # which strips env vars — SEARXNG_SECRET never reaches the process.
+  # Fine for a private, non-exposed instance. Regenerate if you fork publicly:
+  #   openssl rand -hex 32
+  secret_key: '75c6c4edb7cd71247a6a89c94e73746e1390303fb506216fcb7da7c16749f518'
   limiter: false
   public_instance: false
 
